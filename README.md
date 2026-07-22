@@ -18,10 +18,16 @@ Everything runs in Docker.
 
 ## Quick start
 
+**First time** (start everything + seed the data):
+
 ```bash
-make up      # build + start everything (app, 5 engines, LGTM stack)
-make seed    # migrate all SQL engines + seed every engine (100k rows by default)
-make load    # start the load generator so dashboards fill with live data
+npm run setup    # start stack -> seed all engines -> start load generator
+```
+
+**Every time after that** — one command starts everything (data persists in volumes):
+
+```bash
+npm start        # starts the whole stack + load generator
 ```
 
 Then open:
@@ -32,43 +38,32 @@ Then open:
 Scale the dataset up (into the millions):
 
 ```bash
-make seed ROWS=1000000
+docker compose exec app node ace bench:seed all --rows=1000000
 ```
 
-Stop / wipe:
+### All commands
 
-```bash
-make down    # stop, keep data
-make clean   # stop and delete all volumes
-```
+Available as npm scripts (works anywhere `docker compose` is installed) and as `make` targets:
 
-Run `make help` for all targets.
+| npm | make | Description |
+|---|---|---|
+| `npm start` | `make start` | **Start everything** — stack + load generator |
+| `npm run setup` | `make setup` | First run: start stack, seed, start load generator |
+| `npm run up` | `make up` | Start the stack **without** the load generator |
+| `npm run seed` | `make seed` | Migrate all SQL engines + seed every engine |
+| `npm run load:start` | `make load-start` | Start the load generator |
+| `npm run load:stop` | `make load-stop` | Stop the load generator |
+| `npm run stop` | — | Stop containers (keep data) |
+| `npm run down` | `make down` | Stop & remove containers (keep data) |
+| `npm run clean` | `make clean` | Stop & delete all data volumes |
+| `npm run restart:app` | `make restart-app` | Bounce just the app (stack must be running) |
+| `npm run logs:app` | `make logs-app` | Tail the app logs |
+| `npm run ps` | `make ps` | Container status |
+| `npm run grafana` | — | Open Grafana in the browser (macOS) |
 
-### npm scripts (no `make` required)
-
-The same workflow is available as npm scripts, so it works anywhere `docker compose` is installed:
-
-```bash
-npm run setup      # one command: up + seed + load
-npm run up         # build & start the full stack
-npm run seed       # migrate all SQL engines + seed every engine
-npm run load       # start the load generator
-npm run load:stop  # stop the load generator
-npm run logs       # tail the app logs
-npm run ps         # container status
-npm run stop       # stop containers (keep data)
-npm run down       # stop & remove containers (keep data)
-npm run clean      # stop & delete all data volumes
-npm run restart    # bounce just the app (only while the stack is running)
-npm run grafana    # open Grafana in the browser (macOS)
-```
-
-`npm run setup` is the fastest way to go from zero to live dashboards.
-
-> **Resuming after `stop`/`down`:** run `npm run up` — it starts the whole stack
-> (databases + observability + app). `npm run restart` only bounces the **app**
-> container and does not start the databases, so use it only while the stack is
-> already running.
+> **Resuming after `stop`/`down`:** run `npm start` (or `npm run up`) — it starts the
+> whole stack. `npm run restart:app` only bounces the **app** container and does not
+> start the databases, so use it only while the stack is already running.
 
 ## API
 
@@ -77,7 +72,7 @@ npm run grafana    # open Grafana in the browser (macOS)
 | `GET /engines` | Engine health + seeded row counts + available query variants |
 | `GET /bench/:engine/:queryType?indexed=&scoped=&limit=` | Run one variant against one engine, return latency |
 | `GET /bench/compare/:queryType?indexed=&scoped=` | Run one variant across **all** engines |
-| `POST /seed/:engine?rows=` | Reseed one engine (or `all`) — prefer `make seed` for big loads |
+| `POST /seed/:engine?rows=` | Reseed one engine (or `all`) — prefer `npm run seed` for big loads |
 
 `:engine` ∈ `mysql | mariadb | postgres | sqlite | mongo`
 `:queryType` ∈ `point-lookup | range-scan | count | scoping | join | sort-paginate`
