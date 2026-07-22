@@ -29,7 +29,7 @@
       "title": "p95 latency by engine — $query_type",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
-      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["max", "mean"] } },
       "targets": [
         {
@@ -45,7 +45,7 @@
       "title": "p95 latency — indexed vs unindexed — $query_type",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
-      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["max", "mean"] } },
       "targets": [
         {
@@ -61,8 +61,8 @@
       "title": "Avg latency (ms) by engine — $query_type",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
-      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
-      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "ms" }, "overrides": [] },
+      "options": { "orientation": "horizontal", "displayMode": "basic", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
         {
           "refId": "A",
@@ -77,7 +77,7 @@
       "title": "Throughput (runs/sec) by engine",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
-      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
       "targets": [
         {
@@ -93,7 +93,7 @@
       "title": "Scoping cost — p95 by engine (scoped vs unscoped)",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 12, "x": 0, "y": 18 },
-      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean"] } },
       "targets": [
         {
@@ -109,7 +109,7 @@
       "title": "Count timing — p95 by engine (full vs filtered)",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 12, "x": 12, "y": 18 },
-      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean"] } },
       "targets": [
         {
@@ -125,7 +125,7 @@
       "title": "Errors/sec by engine",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 7, "w": 12, "x": 0, "y": 27 },
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 40 } }, "overrides": [] },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic-by-name" },"unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 40 } }, "overrides": [] },
       "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
       "targets": [
         {
