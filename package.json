@@ -10,7 +10,20 @@
     "dev": "node ace serve --hmr",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "setup": "npm run up && npm run seed && npm run load",
+    "up": "docker compose up -d --build",
+    "stop": "docker compose stop",
+    "down": "docker compose down",
+    "clean": "docker compose down -v",
+    "restart": "docker compose restart app",
+    "ps": "docker compose ps",
+    "logs": "docker compose logs -f app",
+    "migrate": "docker compose exec app node ace migration:run --connection=mysql --force && docker compose exec app node ace migration:run --connection=mariadb --force && docker compose exec app node ace migration:run --connection=postgres --force && docker compose exec app node ace migration:run --connection=sqlite --force",
+    "seed": "npm run migrate && docker compose exec app node ace bench:seed all",
+    "load": "docker compose --profile load up -d --build loadgen",
+    "load:stop": "docker compose stop loadgen",
+    "grafana": "open http://localhost:3001"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",

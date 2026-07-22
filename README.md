@@ -44,6 +44,26 @@ make clean   # stop and delete all volumes
 
 Run `make help` for all targets.
 
+### npm scripts (no `make` required)
+
+The same workflow is available as npm scripts, so it works anywhere `docker compose` is installed:
+
+```bash
+npm run setup      # one command: up + seed + load
+npm run up         # build & start the full stack
+npm run seed       # migrate all SQL engines + seed every engine
+npm run load       # start the load generator
+npm run load:stop  # stop the load generator
+npm run logs       # tail the app logs
+npm run ps         # container status
+npm run stop       # stop containers (keep data)
+npm run down       # stop & remove containers (keep data)
+npm run clean      # stop & delete all data volumes
+npm run grafana    # open Grafana in the browser (macOS)
+```
+
+`npm run setup` is the fastest way to go from zero to live dashboards.
+
 ## API
 
 | Method & path | Description |
