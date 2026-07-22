@@ -149,6 +149,50 @@
           "expr": "{service_name=\"observer-app\"}"
         }
       ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Index effect — p95 by engine (green = indexed, red = no index)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 34 },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" },
+        "overrides": [
+          { "matcher": { "id": "byRegexp", "options": "/no index/" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+          { "matcher": { "id": "byRegexp", "options": "/indexed/" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] }
+        ]
+      },
+      "options": { "orientation": "horizontal", "displayMode": "basic", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, engine) (rate(bench_query_duration_ms_bucket{query_type=~\"point-lookup|range-scan|sort-paginate\", indexed=\"true\"}[$__rate_interval])))",
+          "legendFormat": "{{engine}} · indexed"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, engine) (rate(bench_query_duration_ms_bucket{query_type=~\"point-lookup|range-scan|sort-paginate\", indexed=\"false\"}[$__rate_interval])))",
+          "legendFormat": "{{engine}} · no index"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Route latency p95 by endpoint (HTTP, incl. DB time)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 34 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, http_route, http_method) (rate(http_server_duration_milliseconds_bucket[$__rate_interval])))",
+          "legendFormat": "{{http_method}} {{http_route}}"
+        }
+      ]
     }
   ]
 }
