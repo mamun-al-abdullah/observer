@@ -1,0 +1,11 @@
+node_modules
+build
+tmp
+.git
+.env
+.env.*
+npm-debug.log
+*.sqlite3
+.DS_Store
+.idea
+.vscode

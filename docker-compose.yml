@@ -1,0 +1,162 @@
+# Observer — multi-engine DB benchmarking + observability lab.
+# One command up/down:  `make up` / `make down`  (or `docker compose up -d`).
+
+x-app-env: &app-env
+  NODE_ENV: production
+  HOST: 0.0.0.0
+  PORT: "3333"
+  LOG_LEVEL: info
+  TZ: UTC
+  # Static app key — fine for a throwaway local lab.
+  APP_KEY: aB3xK9pLmN2qR7sT5vW8yZ1cD4eF6gH0jK2lM3nP
+
+services:
+  # ---------------------------------------------------------------- app
+  app:
+    build: .
+    image: observer-app
+    environment: *app-env
+    ports:
+      - "3333:3333"
+    volumes:
+      - sqlite_data:/app/tmp
+    depends_on:
+      mysql: { condition: service_healthy }
+      mariadb: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+      mongo: { condition: service_healthy }
+      otel-collector: { condition: service_started }
+    restart: unless-stopped
+
+  # ------------------------------------------------------------ engines
+  mysql:
+    image: mysql:8
+    command: --mysql-native-password=OFF
+    environment:
+      MYSQL_ROOT_PASSWORD: benchpass
+      MYSQL_DATABASE: benchmark
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pbenchpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: benchpass
+      MARIADB_DATABASE: benchmark
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: benchmark
+      POSTGRES_PASSWORD: benchpass
+      POSTGRES_DB: benchmark
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U benchmark -d benchmark"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # ------------------------------------------------------ observability
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  loki:
+    image: grafana/loki:latest
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./observability/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  tempo:
+    image: grafana/tempo:latest
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+
+  # ------------------------------------------------------ load generator
+  # Enabled only with the "load" profile:  make load  /  docker compose --profile load up -d loadgen
+  loadgen:
+    image: observer-app
+    build: .
+    environment: *app-env
+    command: ["node", "ace", "bench:load"]
+    depends_on:
+      app: { condition: service_started }
+    profiles: ["load"]
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  mariadb_data:
+  postgres_data:
+  mongo_data:
+  sqlite_data:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  grafana_data:

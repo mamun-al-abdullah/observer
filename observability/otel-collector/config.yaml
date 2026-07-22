@@ -1,0 +1,53 @@
+# OpenTelemetry Collector — receives OTLP from the app and fans each signal
+# out to its backend: traces -> Tempo, metrics -> Prometheus, logs -> Loki.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 2s
+
+exporters:
+  # Metrics: exposed for Prometheus to scrape at :8889/metrics.
+  # add_metric_suffixes:false keeps names predictable — the histogram stays
+  # `bench_query_duration_ms` (+ _bucket/_sum/_count) instead of gaining a
+  # `_milliseconds` unit suffix.
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    send_timestamps: true
+    add_metric_suffixes: false
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Traces -> Tempo (OTLP gRPC)
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  # Logs -> Loki native OTLP endpoint
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+
+service:
+  telemetry:
+    logs:
+      level: warn
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/loki]

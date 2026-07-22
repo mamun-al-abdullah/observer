@@ -1,0 +1,154 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "version": 1,
+  "title": "Query Latency Comparison",
+  "uid": "query-latency-comparison",
+  "tags": ["observer", "benchmark"],
+  "templating": {
+    "list": [
+      {
+        "name": "query_type",
+        "label": "Query type",
+        "type": "custom",
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" },
+        "query": "point-lookup,range-scan,count,scoping,join,sort-paginate",
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "p95 latency by engine — $query_type",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["max", "mean"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, engine) (rate(bench_query_duration_ms_bucket{query_type=~\"$query_type\"}[$__rate_interval])))",
+          "legendFormat": "{{engine}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 latency — indexed vs unindexed — $query_type",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["max", "mean"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, engine, indexed) (rate(bench_query_duration_ms_bucket{query_type=~\"$query_type\"}[$__rate_interval])))",
+          "legendFormat": "{{engine}} · indexed={{indexed}}"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Avg latency (ms) by engine — $query_type",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+      "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (engine) (rate(bench_query_duration_ms_sum{query_type=~\"$query_type\"}[$__rate_interval])) / sum by (engine) (rate(bench_query_duration_ms_count{query_type=~\"$query_type\"}[$__rate_interval]))",
+          "legendFormat": "{{engine}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Throughput (runs/sec) by engine",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (engine) (rate(bench_query_runs_total{query_type=~\"$query_type\"}[$__rate_interval]))",
+          "legendFormat": "{{engine}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Scoping cost — p95 by engine (scoped vs unscoped)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 18 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, engine, scoped) (rate(bench_query_duration_ms_bucket{query_type=\"scoping\"}[$__rate_interval])))",
+          "legendFormat": "{{engine}} · scoped={{scoped}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Count timing — p95 by engine (full vs filtered)",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 18 },
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "fillOpacity": 8 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le, engine, scoped) (rate(bench_query_duration_ms_bucket{query_type=\"count\"}[$__rate_interval])))",
+          "legendFormat": "{{engine}} · scoped={{scoped}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors/sec by engine",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 27 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "fillOpacity": 40 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (engine) (rate(bench_query_errors_total[$__rate_interval]))",
+          "legendFormat": "{{engine}}"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Application logs (Loki)",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 27 },
+      "options": { "showTime": true, "wrapLogMessage": true, "sortOrder": "Descending" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "loki", "uid": "loki" },
+          "expr": "{service_name=\"observer-app\"}"
+        }
+      ]
+    }
+  ]
+}
