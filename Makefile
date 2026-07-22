@@ -36,8 +36,8 @@ load: ## Start the continuous load generator
 load-stop: ## Stop the load generator
 	docker compose stop loadgen
 
-restart: ## Restart the app container
-	docker compose restart app
+restart: ## Restart the app container (does not wait on DB dependencies)
+	docker compose up -d --force-recreate --no-deps app
 
 logs: ## Tail the app logs
 	docker compose logs -f app

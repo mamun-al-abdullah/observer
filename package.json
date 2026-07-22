@@ -16,7 +16,7 @@
     "stop": "docker compose stop",
     "down": "docker compose down",
     "clean": "docker compose down -v",
-    "restart": "docker compose restart app",
+    "restart": "docker compose up -d --force-recreate --no-deps app",
     "ps": "docker compose ps",
     "logs": "docker compose logs -f app",
     "migrate": "docker compose exec app node ace migration:run --connection=mysql --force && docker compose exec app node ace migration:run --connection=mariadb --force && docker compose exec app node ace migration:run --connection=postgres --force && docker compose exec app node ace migration:run --connection=sqlite --force",
