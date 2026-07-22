@@ -76,8 +76,8 @@ npm run dev:rebuild  # after changing dependencies (package.json)
 ```
 
 The dev image builds only the dependency layer once; after that, code edits apply
-instantly. OpenTelemetry is disabled in dev (its ESM instrumentation can't run raw
-TypeScript), so use `npm start` when you want the full Grafana/traces experience.
+instantly — and telemetry still flows, so the Grafana dashboards stay live while you
+develop. Use `npm start` when you want the fully-compiled production build.
 
 ## API
 
