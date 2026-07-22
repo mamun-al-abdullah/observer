@@ -1,0 +1,23 @@
+# Dev override — runs the app with hot-module reload against your live source,
+# so code changes apply instantly with no image rebuild.
+#
+#   npm run dev            # start the stack with the app in HMR mode
+#
+# It builds only the `deps` stage (dependencies, no TS compile), bind-mounts the
+# project into the container, and keeps the container's Linux-built node_modules
+# via an anonymous volume so the host's node_modules never clobbers it.
+services:
+  app:
+    build:
+      context: .
+      target: deps
+    command: ["node", "ace", "serve", "--hmr"]
+    environment:
+      NODE_ENV: development
+      # File watching over the macOS bind mount needs polling to be reliable.
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
+    volumes:
+      - ./:/app
+      # Anonymous volume: preserve the image's node_modules (compiled for Linux).
+      - /app/node_modules

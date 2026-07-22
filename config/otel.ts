@@ -10,6 +10,14 @@ import { OTEL } from '#config/constants'
  * (metrics), and Loki (logs). Endpoint comes from the global constants module.
  */
 export default defineConfig({
+  /**
+   * Enable telemetry only outside development. In dev the app runs raw
+   * TypeScript, and OTel's ESM instrumentation (import-in-the-middle) cannot
+   * resolve ".ts" imports — so we keep it on for the built stack (`npm start`)
+   * and off for the fast HMR dev loop (`npm run dev`).
+   */
+  enabled: process.env.NODE_ENV === 'production',
+
   serviceName: OTEL.serviceName,
   serviceVersion: '1.0.0',
   environment: 'benchmark',

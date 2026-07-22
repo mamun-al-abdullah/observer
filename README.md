@@ -65,6 +65,20 @@ Available as npm scripts (works anywhere `docker compose` is installed) and as `
 > whole stack. `npm run restart:app` only bounces the **app** container and does not
 > start the databases, so use it only while the stack is already running.
 
+### Dev mode (hot reload)
+
+For working on the code, `npm run dev` starts the stack with the app running in
+**HMR mode** — it bind-mounts your source and reloads on save (no image rebuild):
+
+```bash
+npm run dev        # stack + app with hot reload (edits apply in ~2s)
+npm run dev:rebuild  # after changing dependencies (package.json)
+```
+
+The dev image builds only the dependency layer once; after that, code edits apply
+instantly. OpenTelemetry is disabled in dev (its ESM instrumentation can't run raw
+TypeScript), so use `npm start` when you want the full Grafana/traces experience.
+
 ## API
 
 | Method & path | Description |

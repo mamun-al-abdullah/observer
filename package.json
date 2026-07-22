@@ -19,8 +19,9 @@
     "load:start": "docker compose --profile load up -d --build loadgen",
     "load:stop": "docker compose stop loadgen",
     "grafana": "open http://localhost:3001",
+    "dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build",
+    "dev:rebuild": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build --force-recreate --renew-anon-volumes app",
     "build": "node ace build",
-    "dev": "node ace serve --hmr",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
@@ -50,10 +51,10 @@
     "@types/luxon": "^3.4.2",
     "@types/node": "^24.0.0",
     "eslint": "^9.26.0",
+    "@poppinss/ts-exec": "^1.4.4",
     "hot-hook": "^0.4.0",
     "pino-pretty": "^13.0.0",
     "prettier": "^3.5.3",
-    "ts-node-maintained": "^10.9.5",
     "typescript": "~5.8"
   },
   "dependencies": {
