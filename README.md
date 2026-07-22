@@ -59,10 +59,16 @@ npm run ps         # container status
 npm run stop       # stop containers (keep data)
 npm run down       # stop & remove containers (keep data)
 npm run clean      # stop & delete all data volumes
+npm run restart    # bounce just the app (only while the stack is running)
 npm run grafana    # open Grafana in the browser (macOS)
 ```
 
 `npm run setup` is the fastest way to go from zero to live dashboards.
+
+> **Resuming after `stop`/`down`:** run `npm run up` — it starts the whole stack
+> (databases + observability + app). `npm run restart` only bounces the **app**
+> container and does not start the databases, so use it only while the stack is
+> already running.
 
 ## API
 
